@@ -1,98 +1,88 @@
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans JP", sans-serif;
-  margin: 1.5rem;
-  color: #222;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
   background: #f9fafb;
+  color: #222;
 }
 
 header {
-  margin-bottom: 1rem;
-}
-
-h1 {
-  margin-bottom: 0.2rem;
-}
-
-.notice {
-  background: #fff3cd;
-  border: 1px solid #ffeeba;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
-.errors {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
+  background: #0d6efd;
+  color: white;
+  padding: 1rem 2rem;
+  text-align: center;
 }
 
 .container {
   display: flex;
-  flex-wrap: wrap;
   gap: 2rem;
+  padding: 2rem;
 }
 
-/* 左カラム（フォーム） */
-.left-column {
-  flex: 1 1 340px;
-  max-width: 420px;
-  background: #fff;
+.left-column, .right-column {
+  background: white;
+  padding: 1.5rem;
   border-radius: 12px;
-  padding: 1rem 1.2rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.left-column {
+  flex: 1;
+  max-width: 380px;
+}
+
+.right-column {
+  flex: 2;
+}
+
+h2 {
+  margin-top: 0;
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.75rem;
 }
 
-input[type="text"],
-input[type="number"],
-textarea {
-  width: 100%;
-  padding: 0.6rem 0.7rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+input, textarea {
   font-size: 1rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
 textarea {
   min-height: 100px;
+  resize: vertical;
 }
 
 .btn {
-  display: inline-block;
-  padding: 0.6rem 1rem;
-  background: #0969da;
+  background: #0d6efd;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
   cursor: pointer;
   font-weight: 600;
 }
-
 .btn:hover {
-  background: #0757b3;
+  background: #0b5ed7;
 }
 
-/* 右カラム（一覧） */
-.right-column {
-  flex: 2 1 500px;
+.errors {
+  background: #f8d7da;
+  color: #842029;
+  border: 1px solid #f5c2c7;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
 }
 
 .card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
   padding: 1rem;
-  margin-bottom: 0.8rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  margin-bottom: 1rem;
 }
 
 .card-header {
@@ -101,24 +91,9 @@ textarea {
   align-items: center;
 }
 
-.btn-delete {
-  background: #d9534f;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.3rem 0.6rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.btn-delete:hover {
-  background: #c9302c;
-}
-
 .meta {
-  color: #555;
   font-size: 0.9rem;
-  margin-top: 0.25rem;
+  color: #555;
 }
 
 .desc {
@@ -126,14 +101,70 @@ textarea {
   white-space: pre-wrap;
 }
 
-.empty {
-  color: #666;
-  font-style: italic;
+.btn-group {
+  display: flex;
+  gap: 0.4rem;
 }
 
-footer {
-  margin-top: 2rem;
-  color: #666;
-  font-size: 0.9rem;
-  text-align: center;
+.btn-delete {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+.btn-delete:hover {
+  background: #bb2d3b;
+}
+
+.btn-edit {
+  background: #198754;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+.btn-edit:hover {
+  background: #157347;
+}
+
+/* モーダル */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal-content {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.btn-cancel {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+.btn-cancel:hover {
+  background: #5a6268;
 }

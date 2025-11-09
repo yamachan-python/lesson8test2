@@ -2,79 +2,109 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>レシピ投稿ミニアプリ</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <header>
-    <h1>レシピ投稿ミニアプリ</h1>
-    <p>左で投稿、右でレシピ一覧を閲覧できます。</p>
-  </header>
+<header>
+  <h1>レシピ投稿ミニアプリ</h1>
+</header>
 
-  {% if not db_ready %}
-    <div class="notice">
-      <strong>DB未設定：</strong> 環境変数 <code>DATABASE_URL</code> が見つかりません。
-    </div>
-  {% endif %}
-
-  <main class="container">
-    <!-- 左カラム（投稿フォーム） -->
-    <section class="left-column">
-      <h2>新しいレシピを投稿</h2>
-
-      {% if errors %}
-        <div class="errors">
-          <ul>
-            {% for e in errors %}
-              <li>{{ e }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-
-      <form method="post" action="{{ url_for('index') }}">
-        <label for="title">タイトル（必須・200文字まで）</label>
-        <input id="title" name="title" type="text" maxlength="200" required value="{{ form_values.title }}">
-
-        <label for="minutes">所要分数（必須・整数・1以上）</label>
-        <input id="minutes" name="minutes" type="number" step="1" min="1" required value="{{ form_values.minutes }}">
-
-        <label for="description">説明（任意）</label>
-        <textarea id="description" name="description">{{ form_values.description }}</textarea>
-
-        <button class="btn" type="submit">投稿する</button>
-      </form>
-    </section>
-
-    <!-- 右カラム（レシピ一覧） -->
-    <section class="right-column">
-      <h2>レシピ一覧</h2>
-      <div class="list">
-        {% if recipes %}
-          {% for r in recipes %}
-            <div class="card">
-              <div class="card-header">
-                <strong>{{ r.title }}</strong>
-                <form method="post" action="{{ url_for('delete_recipe', recipe_id=r.id) }}" onsubmit="return confirm('本当に削除しますか？');">
-                  <button type="submit" class="btn-delete">削除</button>
-                </form>
-              </div>
-              <div class="meta">所要分数: {{ r.minutes }} 分 / 投稿日時(UTC): {{ r.created_at }}</div>
-              {% if r.description %}
-                <div class="desc">{{ r.description }}</div>
-              {% endif %}
-            </div>
+<main class="container">
+  <!-- 左カラム：投稿フォーム -->
+  <section class="left-column">
+    <h2>新規投稿</h2>
+    {% if errors %}
+      <div class="errors">
+        <ul>
+          {% for e in errors %}
+            <li>{{ e }}</li>
           {% endfor %}
-        {% else %}
-          <p class="empty">投稿はまだありません。</p>
-        {% endif %}
+        </ul>
       </div>
-    </section>
-  </main>
+    {% endif %}
+    <form method="post">
+      <input type="hidden" name="_action" value="create">
+      <label>タイトル</label>
+      <input name="title" value="{{ form_values.title }}" required maxlength="200">
 
-  <footer>
-    <code>DEBUG={{ debug|lower }}</code> / <code>PORT={{ port }}</code>
-  </footer>
+      <label>所要分数</label>
+      <input type="number" name="minutes" value="{{ form_values.minutes }}" min="1" required>
+
+      <label>説明</label>
+      <textarea name="description">{{ form_values.description }}</textarea>
+
+      <button class="btn" type="submit">投稿</button>
+    </form>
+  </section>
+
+  <!-- 右カラム：一覧 -->
+  <section class="right-column">
+    <h2>レシピ一覧</h2>
+    {% if recipes %}
+      {% for r in recipes %}
+        <div class="card" id="card-{{ r.id }}">
+          <div class="card-header">
+            <strong>{{ r.title }}</strong>
+            <div class="btn-group">
+              <button class="btn-edit"
+                onclick="openEditModal({{ r.id }}, '{{ r.title|escape }}', {{ r.minutes }}, '{{ r.description|default('')|escape }}')">編集</button>
+              <form method="post" action="{{ url_for('delete_recipe', recipe_id=r.id) }}" onsubmit="return confirm('削除しますか？');">
+                <button type="submit" class="btn-delete">削除</button>
+              </form>
+            </div>
+          </div>
+          <div class="meta">所要時間: {{ r.minutes }} 分 / 投稿日: {{ r.created_at }}</div>
+          {% if r.description %}
+            <div class="desc">{{ r.description }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>投稿がありません。</p>
+    {% endif %}
+  </section>
+</main>
+
+<!-- 編集モーダル -->
+<div id="edit-modal" class="modal">
+  <div class="modal-content">
+    <h3>レシピを編集</h3>
+    <form id="edit-form" method="post">
+      <label>タイトル</label>
+      <input id="edit_title" name="edit_title" required maxlength="200">
+
+      <label>所要分数</label>
+      <input id="edit_minutes" name="edit_minutes" type="number" min="1" required>
+
+      <label>説明</label>
+      <textarea id="edit_description" name="edit_description"></textarea>
+
+      <div class="modal-buttons">
+        <button type="submit" class="btn">更新</button>
+        <button type="button" class="btn-cancel" onclick="closeModal()">キャンセル</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openEditModal(id, title, minutes, description) {
+  const modal = document.getElementById('edit-modal');
+  document.getElementById('edit_title').value = title;
+  document.getElementById('edit_minutes').value = minutes;
+  document.getElementById('edit_description').value = description;
+  document.getElementById('edit-form').action = `/edit/${id}`;
+  modal.style.display = 'flex';
+}
+function closeModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+window.onclick = function(e) {
+  const modal = document.getElementById('edit-modal');
+  if (e.target === modal) closeModal();
+};
+</script>
+
 </body>
 </html>
