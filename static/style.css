@@ -95,6 +95,26 @@ textarea {
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-delete {
+  background: #d9534f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-delete:hover {
+  background: #c9302c;
+}
+
 .meta {
   color: #555;
   font-size: 0.9rem;

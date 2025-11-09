@@ -54,7 +54,12 @@
         {% if recipes %}
           {% for r in recipes %}
             <div class="card">
-              <div><strong>{{ r.title }}</strong></div>
+              <div class="card-header">
+                <strong>{{ r.title }}</strong>
+                <form method="post" action="{{ url_for('delete_recipe', recipe_id=r.id) }}" onsubmit="return confirm('本当に削除しますか？');">
+                  <button type="submit" class="btn-delete">削除</button>
+                </form>
+              </div>
               <div class="meta">所要分数: {{ r.minutes }} 分 / 投稿日時(UTC): {{ r.created_at }}</div>
               {% if r.description %}
                 <div class="desc">{{ r.description }}</div>

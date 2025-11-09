@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-レシピ投稿ミニアプリ（左右2カラムレイアウト版）
-- Flask 3 + SQLAlchemy 2 + Render PostgreSQL
+レシピ投稿ミニアプリ（左右2カラム + 削除機能付き）
+Flask + SQLAlchemy + Render PostgreSQL
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ DATABASE_URL = get_database_url()
 engine = create_engine(DATABASE_URL, pool_pre_ping=True) if DATABASE_URL else None
 
 # ==============================
-# モデル定義
+# モデル
 # ==============================
 class Base(DeclarativeBase):
     pass
@@ -56,11 +56,15 @@ def _to_bool_env(value: Optional[str], default: bool = False) -> bool:
         return default
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
+# ==============================
+# メインページ（一覧・投稿）
+# ==============================
 @app.route("/", methods=["GET", "POST"])
 def index():
     errors: List[str] = []
     form_values = {"title": "", "minutes": "", "description": ""}
 
+    # --- 投稿処理 ---
     if request.method == "POST":
         title = (request.form.get("title") or "").strip()
         minutes_raw = (request.form.get("minutes") or "").strip()
@@ -69,7 +73,6 @@ def index():
         form_values.update({"title": title, "minutes": minutes_raw, "description": description})
         minutes_val: Optional[int] = None
 
-        # --- バリデーション ---
         if not title:
             errors.append("タイトルは必須です。")
         elif len(title) > 200:
@@ -88,7 +91,6 @@ def index():
         if engine is None:
             errors.append("データベースが未設定のため保存できません。DATABASE_URL を設定してください。")
 
-        # --- 保存 ---
         if not errors and engine is not None and minutes_val is not None:
             try:
                 with Session(engine) as session:
@@ -99,7 +101,7 @@ def index():
             except Exception:
                 errors.append("保存中にエラーが発生しました。")
 
-    # --- 一覧 ---
+    # --- 一覧表示 ---
     recipes: List[Recipe] = []
     if engine is not None:
         try:
@@ -119,6 +121,25 @@ def index():
         db_ready=(engine is not None),
         form_values=form_values,
     )
+
+# ==============================
+# 削除処理
+# ==============================
+@app.route("/delete/<int:recipe_id>", methods=["POST"])
+def delete_recipe(recipe_id: int):
+    if engine is None:
+        return redirect(url_for("index"))
+
+    try:
+        with Session(engine) as session:
+            recipe = session.get(Recipe, recipe_id)
+            if recipe:
+                session.delete(recipe)
+                session.commit()
+    except Exception:
+        pass  # シンプルにスルー（本番ではログ出力推奨）
+
+    return redirect(url_for("index"))
 
 # ==============================
 # 起動
