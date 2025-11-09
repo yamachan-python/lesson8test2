@@ -1,70 +1,75 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>レシピ投稿ミニアプリ</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>レシピ投稿ミニアプリ</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <h1>レシピ投稿ミニアプリ</h1>
-  <p>「タイトル」「所要分数」「説明」を入力して投稿してください。投稿後は一覧の先頭に表示されます。</p>
+  <header>
+    <h1>レシピ投稿ミニアプリ</h1>
+    <p>左で投稿、右でレシピ一覧を閲覧できます。</p>
+  </header>
 
   {% if not db_ready %}
-  <div class="notice">
-    <strong>DB未設定：</strong> 環境変数 <code>DATABASE_URL</code> が見つかりません。<br>
-    ローカルでは .env に <code>DATABASE_URL=...</code> を設定してください。
-  </div>
+    <div class="notice">
+      <strong>DB未設定：</strong> 環境変数 <code>DATABASE_URL</code> が見つかりません。
+    </div>
   {% endif %}
 
-  {% if errors %}
-  <div class="errors">
-    <div><strong>入力エラーがあります：</strong></div>
-    <ul>
-      {% for e in errors %}
-      <li>{{ e }}</li>
-      {% endfor %}
-    </ul>
-  </div>
-  {% endif %}
+  <main class="container">
+    <!-- 左カラム（投稿フォーム） -->
+    <section class="left-column">
+      <h2>新しいレシピを投稿</h2>
 
-  <form method="post" action="{{ url_for('index') }}">
-    <div>
-      <label for="title">タイトル（必須・200文字まで）</label>
-      <input id="title" name="title" type="text" maxlength="200" required value="{{ form_values.title }}">
-    </div>
-    <div>
-      <label for="minutes">所要分数（必須・整数・1以上）</label>
-      <input id="minutes" name="minutes" type="number" step="1" min="1" required value="{{ form_values.minutes }}">
-    </div>
-    <div>
-      <label for="description">説明（任意）</label>
-      <textarea id="description" name="description">{{ form_values.description }}</textarea>
-    </div>
-    <div>
-      <button class="btn" type="submit">投稿する</button>
-    </div>
-  </form>
-
-  <h2>レシピ一覧</h2>
-  <div class="list">
-    {% if recipes %}
-      {% for r in recipes %}
-        <div class="card">
-          <div><strong>{{ r.title }}</strong></div>
-          <div class="meta">所要分数: {{ r.minutes }} 分 / 投稿日時(UTC): {{ r.created_at }}</div>
-          {% if r.description %}
-          <div style="margin-top:0.5rem; white-space:pre-wrap;">{{ r.description }}</div>
-          {% endif %}
+      {% if errors %}
+        <div class="errors">
+          <ul>
+            {% for e in errors %}
+              <li>{{ e }}</li>
+            {% endfor %}
+          </ul>
         </div>
-      {% endfor %}
-    {% else %}
-      <div class="empty">投稿はまだありません。最初のレシピを投稿してみましょう！</div>
-    {% endif %}
-  </div>
+      {% endif %}
 
-  <div class="footer">
+      <form method="post" action="{{ url_for('index') }}">
+        <label for="title">タイトル（必須・200文字まで）</label>
+        <input id="title" name="title" type="text" maxlength="200" required value="{{ form_values.title }}">
+
+        <label for="minutes">所要分数（必須・整数・1以上）</label>
+        <input id="minutes" name="minutes" type="number" step="1" min="1" required value="{{ form_values.minutes }}">
+
+        <label for="description">説明（任意）</label>
+        <textarea id="description" name="description">{{ form_values.description }}</textarea>
+
+        <button class="btn" type="submit">投稿する</button>
+      </form>
+    </section>
+
+    <!-- 右カラム（レシピ一覧） -->
+    <section class="right-column">
+      <h2>レシピ一覧</h2>
+      <div class="list">
+        {% if recipes %}
+          {% for r in recipes %}
+            <div class="card">
+              <div><strong>{{ r.title }}</strong></div>
+              <div class="meta">所要分数: {{ r.minutes }} 分 / 投稿日時(UTC): {{ r.created_at }}</div>
+              {% if r.description %}
+                <div class="desc">{{ r.description }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="empty">投稿はまだありません。</p>
+        {% endif %}
+      </div>
+    </section>
+  </main>
+
+  <footer>
     <code>DEBUG={{ debug|lower }}</code> / <code>PORT={{ port }}</code>
-  </div>
+  </footer>
 </body>
 </html>
